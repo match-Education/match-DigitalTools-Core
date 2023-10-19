@@ -49,7 +49,7 @@ def generate_launch_description():
             "-z",
             "0.05",
         ],
-        output="screen",
+        output="log",
     )
 
     ign_bridge = Node(
@@ -75,7 +75,7 @@ def generate_launch_description():
             ("/camera/depth_image", "/camera/depth/image_raw"),
             ("/camera/points", "/camera/depth/points"),
         ],
-        output="screen",
+        output="log",
     )
 
     bringup_launch = IncludeLaunchDescription(
