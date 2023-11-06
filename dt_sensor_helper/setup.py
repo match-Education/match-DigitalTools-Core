@@ -24,6 +24,8 @@ setup(
         'console_scripts': [
             "simplify_laser_scan_node = dt_sensor_helper.simplify_laser_scan:main",
             "simplify_laser_scan_showcase_node = dt_sensor_helper.simplify_laser_scan_showcase:main",
+            "simplify_laser_scan_class_node = dt_sensor_helper.simplify_laser_scan_class:main",
+            "simplify_laser_scan_class_showcase_node = dt_sensor_helper.simplify_laser_scan_class_showcase:main",
         ],
     },
 )
