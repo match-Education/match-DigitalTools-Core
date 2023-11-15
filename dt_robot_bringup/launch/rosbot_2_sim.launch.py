@@ -32,6 +32,27 @@ def generate_launch_description():
         description="Whether GPU acceleration is used",
     )
 
+    x = LaunchConfiguration("x")
+    declare_x_arg = DeclareLaunchArgument(
+        "x",
+        default_value="0.0",
+        description="x-position of the mobile robot.",
+    )
+
+    y = LaunchConfiguration("y")
+    declare_y_arg = DeclareLaunchArgument(
+        "y",
+        default_value="0.0",
+        description="y-position of the mobile robot.",
+    )
+
+    Y = LaunchConfiguration("Y")
+    declare_Y_arg = DeclareLaunchArgument(
+        "Y",
+        default_value="0.0",
+        description="yaw-orientation of the mobile robot.",
+    )
+
     gz_spawn_entity = Node(
         package="ros_gz_sim",
         executable="create",
@@ -43,11 +64,13 @@ def generate_launch_description():
             "-topic",
             "robot_description",
             "-x",
-            "0",
+            x,
             "-y",
-            "0.0",
+            y,
             "-z",
             "0.05",
+            "-Y",
+            Y,
         ],
         output="log",
     )
@@ -118,6 +141,10 @@ def generate_launch_description():
     return LaunchDescription(
         [
             declare_mecanum_arg,
+            declare_use_gpu_arg,
+            declare_x_arg,
+            declare_y_arg,
+            declare_Y_arg,
             gz_spawn_entity,
             ign_bridge,
             bringup_launch,

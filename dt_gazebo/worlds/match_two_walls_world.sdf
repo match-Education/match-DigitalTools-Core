@@ -55,13 +55,13 @@
         <visual name="visual">
           <geometry>
             <mesh>
-              <uri>meshes/match_empty_world.obj</uri>
+              <uri>meshes/match_two_walls_world.obj</uri>
               <scale>0.001 0.001 0.001</scale>
             </mesh>
           </geometry>
           <material>
             <ambient>0 0 0 1</ambient>
-            <diffuse>0.6941176470588235 0.792156862745098 0.1294117647058823 1</diffuse>
+            <diffuse>0.42 0.42 0.42 1</diffuse>
             <specular>0.1 0.1 0.1 1</specular>
             <emissive>0 0 0 0</emissive>
           </material>
@@ -69,7 +69,7 @@
         <collision name="visual">
           <geometry>
             <mesh>
-              <uri>meshes/match_empty_world.obj</uri>
+              <uri>meshes/match_two_walls_world.obj</uri>
               <scale>0.001 0.001 0.001</scale>
             </mesh>
           </geometry>
