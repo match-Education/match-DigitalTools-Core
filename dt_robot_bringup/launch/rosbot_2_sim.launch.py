@@ -3,6 +3,7 @@ from launch.actions import (
     IncludeLaunchDescription,
     DeclareLaunchArgument,
 )
+from launch.conditions import IfCondition
 from launch.substitutions import (
     PathJoinSubstitution,
     PythonExpression,
@@ -51,6 +52,13 @@ def generate_launch_description():
         "Y",
         default_value="0.0",
         description="yaw-orientation of the mobile robot.",
+    )
+
+    activate_obstacle_detection = LaunchConfiguration("activate_obstacle_detection")
+    declare_activate_obstacle_detection_arg = DeclareLaunchArgument(
+        "activate_obstacle_detection",
+        default_value="False",
+        description="Activates the node that evaluates the laser scanner and publishes 8 zones.",
     )
 
     gz_spawn_entity = Node(
@@ -138,6 +146,14 @@ def generate_launch_description():
         ],
     )
 
+    obstacle_detection = Node(
+        condition=IfCondition(PythonExpression([activate_obstacle_detection])),
+        package="dt_sensor_helper",
+        executable="simplify_laser_scan_class_node",
+        name="simplify_laser_scan_class",
+        output="log",
+    )
+
     return LaunchDescription(
         [
             declare_mecanum_arg,
@@ -149,5 +165,6 @@ def generate_launch_description():
             ign_bridge,
             bringup_launch,
             depth_cam_frame_fixer,
+            obstacle_detection
         ]
     )

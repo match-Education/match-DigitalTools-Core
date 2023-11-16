@@ -26,18 +26,20 @@ class SimplifyLaserScanNode(Node):
         self._obstacle_detected_publisher = self.create_publisher(ObstacleDetected, 
                                                                   "/obstacle_detection", 
                                                                   10)
+        
+        self._obstacle_detected_range = 0.25
 
     def laser_scan_callback(self, laser_scan_msg: LaserScan) -> None:
     
         obstacle_detected_msgs: ObstacleDetected = ObstacleDetected()
-        obstacle_detected_msgs.front = laser_scan_msg.ranges[0] < 0.22
-        obstacle_detected_msgs.front_left = laser_scan_msg.ranges[200] < 0.22
-        obstacle_detected_msgs.left = laser_scan_msg.ranges[400] < 0.22
-        obstacle_detected_msgs.back_left = laser_scan_msg.ranges[600] < 0.22
-        obstacle_detected_msgs.back = laser_scan_msg.ranges[800] < 0.22
-        obstacle_detected_msgs.back_right = laser_scan_msg.ranges[1000] < 0.22
-        obstacle_detected_msgs.right = laser_scan_msg.ranges[1200] < 0.22
-        obstacle_detected_msgs.front_right = laser_scan_msg.ranges[1400] < 0.22
+        obstacle_detected_msgs.front = laser_scan_msg.ranges[0] < self._obstacle_detected_range
+        obstacle_detected_msgs.front_left = laser_scan_msg.ranges[200] < self._obstacle_detected_range
+        obstacle_detected_msgs.left = laser_scan_msg.ranges[400] < self._obstacle_detected_range
+        obstacle_detected_msgs.back_left = laser_scan_msg.ranges[600] < self._obstacle_detected_range
+        obstacle_detected_msgs.back = laser_scan_msg.ranges[800] < self._obstacle_detected_range
+        obstacle_detected_msgs.back_right = laser_scan_msg.ranges[1000] < self._obstacle_detected_range
+        obstacle_detected_msgs.right = laser_scan_msg.ranges[1200] < self._obstacle_detected_range
+        obstacle_detected_msgs.front_right = laser_scan_msg.ranges[1400] < self._obstacle_detected_range
 
         obstacle_detected_msgs.obstacle_detected = [obstacle_detected_msgs.front,
                                                     obstacle_detected_msgs.front_left,
