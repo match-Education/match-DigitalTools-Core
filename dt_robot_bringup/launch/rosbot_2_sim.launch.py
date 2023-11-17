@@ -99,6 +99,7 @@ def generate_launch_description():
             "/range/fr@sensor_msgs/msg/LaserScan[ignition.msgs.LaserScan",
             "/range/rl@sensor_msgs/msg/LaserScan[ignition.msgs.LaserScan",
             "/range/rr@sensor_msgs/msg/LaserScan[ignition.msgs.LaserScan",
+            "/clock@rosgraph_msgs/msg/Clock[ignition.msgs.Clock",
         ],
         remappings=[
             ("/camera/camera_info", "/camera/color/camera_info"),
@@ -161,6 +162,7 @@ def generate_launch_description():
             declare_x_arg,
             declare_y_arg,
             declare_Y_arg,
+            declare_activate_obstacle_detection_arg,
             gz_spawn_entity,
             ign_bridge,
             bringup_launch,
