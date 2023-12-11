@@ -7,8 +7,7 @@ from rclpy.node import Node
 #############################################################################################
 # Start of student import section
 
-from sensor_msgs.msg import LaserScan
-from dt_msgs.msg import ObstacleDetected
+
 
 # End of student import section
 #############################################################################################
@@ -19,27 +18,7 @@ class SimplifyLaserScanNode(Node):
     def __init__(self) -> None:
         super().__init__('simplify_laser_scan')
 
-        # Create subscriber for laser scan topic
-        self.laser_scan_subscriber = self.create_subscription(LaserScan, 
-                                                         "/scan",
-                                                         self.laser_scan_callback,
-                                                         10)
-        self.obstacle_detection_publisher = self.create_publisher(ObstacleDetected,
-                                                             '/obstacle_detection',
-                                                             10)
-    
-    def laser_scan_callback(self, laser_scan_msg: LaserScan):
-        obstacle_detected_msg = ObstacleDetected()
-        obstacle_detected_msg.front = laser_scan_msg.ranges[0] < 0.22
-        obstacle_detected_msg.front_left = laser_scan_msg.ranges[200] < 0.22
-        obstacle_detected_msg.left = laser_scan_msg.ranges[400] < 0.22
-        obstacle_detected_msg.back_left = laser_scan_msg.ranges[600] < 0.22
-        obstacle_detected_msg.back = laser_scan_msg.ranges[800] < 0.22
-        obstacle_detected_msg.back_right = laser_scan_msg.ranges[1000] < 0.22
-        obstacle_detected_msg.right = laser_scan_msg.ranges[1200] < 0.22
-        obstacle_detected_msg.front_right = laser_scan_msg.ranges[1400] < 0.22
 
-        self.obstacle_detection_publisher.publish(obstacle_detected_msg)
 
 # End of student class section
 #############################################################################################
