@@ -7,7 +7,7 @@
   <maintainer email="henrik.lurz@web.de">nhkw0001</maintainer>
   <license>TODO: License declaration</license>
 
-  <exec_depend>tutorial_interfaces</exec_depend>
+  <exec_depend>dt_msgs</exec_depend>
   
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
