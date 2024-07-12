@@ -12,18 +12,26 @@ from launch.substitutions import (
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 from launch_ros.actions import Node, SetParameter
+from launch_ros.substitutions import FindPackageShare
+
+from nav2_common.launch import ReplaceString
 
 from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
+    # Will be used as namespace for the underlying launch files and nodes
+    robot_name = LaunchConfiguration("robot_name")
+    declare_namespace_arg = DeclareLaunchArgument(
+        "robot_name",
+        default_value="",
+        description="Name of the spawned robot in Gazebo",
+    )
+    
     mecanum = LaunchConfiguration("mecanum")
     declare_mecanum_arg = DeclareLaunchArgument(
         "mecanum",
         default_value="True",
-        description=(
-            "Whether to use mecanum drive controller "
-            "(otherwise diff drive controller is used)"
-        ),
+        description="Whether to use mecanum drive controller (otherwise diff drive controller is used)"
     )
 
     use_gpu = LaunchConfiguration("use_gpu")
@@ -31,6 +39,13 @@ def generate_launch_description():
         "use_gpu",
         default_value="True",
         description="Whether GPU acceleration is used",
+    )
+
+    activate_obstacle_detection = LaunchConfiguration("activate_obstacle_detection")
+    declare_activate_obstacle_detection_arg = DeclareLaunchArgument(
+        "activate_obstacle_detection",
+        default_value="True",
+        description="Activates the node that evaluates the laser scanner and publishes 8 zones.",
     )
 
     x = LaunchConfiguration("x")
@@ -47,76 +62,42 @@ def generate_launch_description():
         description="y-position of the mobile robot.",
     )
 
+    z = LaunchConfiguration("z")
+    declare_z_arg = DeclareLaunchArgument(
+        "z",
+        default_value="0.0",
+        description="z-position of the mobile robot.",
+    )
+
+    R = LaunchConfiguration("R")
+    declare_R_arg = DeclareLaunchArgument(
+        "R",
+        default_value="0.0",
+        description="roll-orientation of the mobile robot.",
+    )
+
+    P = LaunchConfiguration("P")
+    declare_P_arg = DeclareLaunchArgument(
+        "P",
+        default_value="0.0",
+        description="pitch-orientation of the mobile robot.",
+    )
+
     Y = LaunchConfiguration("Y")
     declare_Y_arg = DeclareLaunchArgument(
         "Y",
         default_value="0.0",
         description="yaw-orientation of the mobile robot.",
     )
-
-    activate_obstacle_detection = LaunchConfiguration("activate_obstacle_detection")
-    declare_activate_obstacle_detection_arg = DeclareLaunchArgument(
-        "activate_obstacle_detection",
-        default_value="False",
-        description="Activates the node that evaluates the laser scanner and publishes 8 zones.",
-    )
-
-    gz_spawn_entity = Node(
-        package="ros_gz_sim",
-        executable="create",
-        arguments=[
-            "-name",
-            "rosbot",
-            "-allow_renaming",
-            "true",
-            "-topic",
-            "robot_description",
-            "-x",
-            x,
-            "-y",
-            y,
-            "-z",
-            "0.05",
-            "-Y",
-            Y,
-        ],
-        output="log",
-    )
-
-    ign_bridge = Node(
-        package="ros_gz_bridge",
-        executable="parameter_bridge",
-        name="ros_gz_bridge",
-        arguments=[
-            "/scan@sensor_msgs/msg/LaserScan[ignition.msgs.LaserScan",
-            "/camera/camera_info@sensor_msgs/msg/CameraInfo[ignition.msgs.CameraInfo",
-            "/camera/depth_image@sensor_msgs/msg/Image[ignition.msgs.Image",
-            "/camera/image@sensor_msgs/msg/Image[ignition.msgs.Image",
-            "/camera/points@sensor_msgs/msg/PointCloud2[ignition.msgs.PointCloudPacked",
-            "/clock@rosgraph_msgs/msg/Clock[ignition.msgs.Clock",
-            # an IR sensor is not implemented yet https://github.com/gazebosim/gz-sensors/issues/19
-            "/range/fl@sensor_msgs/msg/LaserScan[ignition.msgs.LaserScan",
-            "/range/fr@sensor_msgs/msg/LaserScan[ignition.msgs.LaserScan",
-            "/range/rl@sensor_msgs/msg/LaserScan[ignition.msgs.LaserScan",
-            "/range/rr@sensor_msgs/msg/LaserScan[ignition.msgs.LaserScan",
-            "/clock@rosgraph_msgs/msg/Clock[ignition.msgs.Clock",
-        ],
-        remappings=[
-            ("/camera/camera_info", "/camera/color/camera_info"),
-            ("/camera/image", "/camera/color/image_raw"),
-            ("/camera/depth_image", "/camera/depth/image_raw"),
-            ("/camera/points", "/camera/depth/points"),
-        ],
-        output="log",
-    )
-
-    bringup_launch = IncludeLaunchDescription(
+    
+    # The following include is copied and adapted from the package rosbot_gazebo and spawn.launch.py
+    rosbot = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             PathJoinSubstitution(
                 [
-                    get_package_share_directory("rosbot_bringup"),
+                    FindPackageShare("rosbot_gazebo"),
                     "launch",
-                    "bringup.launch.py",
+                    "spawn.launch.py",
                 ]
             )
         ),
@@ -125,28 +106,18 @@ def generate_launch_description():
             "use_sim": "True",
             "use_gpu": use_gpu,
             "simulation_engine": "ignition-gazebo",
+            "namespace": robot_name,
+            "x": x,
+            "y": y,
+            "z": z,
+            "roll": R,
+            "pitch": P,
+            "yaw": Y,
         }.items(),
     )
 
-    # The frame of the pointcloud from ignition gazebo 6 isn't provided by <frame_id>.
-    # See https://github.com/gazebosim/gz-sensors/issues/239
-    depth_cam_frame_fixer = Node(
-        package="tf2_ros",
-        executable="static_transform_publisher",
-        name="depth_to_camera",
-        output="log",
-        arguments=[
-            "0.0",
-            "0.0",
-            "0.0",
-            "1.57",
-            "-1.57",
-            "0.0",
-            "camera_depth_optical_frame",
-            "rosbot/base_link/camera_orbbec_astra_camera",
-        ],
-    )
-
+    # Node for easier usage of the laser scan data for collision detection
+    # Later the namespace should be added
     obstacle_detection = Node(
         condition=IfCondition(PythonExpression([activate_obstacle_detection])),
         package="dt_sensor_helper",
@@ -157,16 +128,17 @@ def generate_launch_description():
 
     return LaunchDescription(
         [
+            declare_namespace_arg,
             declare_mecanum_arg,
             declare_use_gpu_arg,
+            declare_activate_obstacle_detection_arg,
             declare_x_arg,
             declare_y_arg,
+            declare_z_arg,
+            declare_R_arg,
+            declare_P_arg,
             declare_Y_arg,
-            declare_activate_obstacle_detection_arg,
-            gz_spawn_entity,
-            ign_bridge,
-            bringup_launch,
-            depth_cam_frame_fixer,
+            rosbot,
             obstacle_detection
         ]
     )
