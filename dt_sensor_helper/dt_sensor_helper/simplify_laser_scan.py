@@ -76,7 +76,7 @@ def main(args = None):
                                                                              10)
     
     while rclpy.ok():
-        if saved_laser_scan_msgs is not None:
+        # if saved_laser_scan_msgs is not None:
             # Debugging
             # simplify_laser_scan_node.get_logger().info("0: " + str(saved_laser_scan_msgs.ranges[0]))
             # simplify_laser_scan_node.get_logger().info("400: " + str(saved_laser_scan_msgs.ranges[400]))
